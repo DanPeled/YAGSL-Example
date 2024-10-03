@@ -1,12 +1,19 @@
 package swervelib.encoders;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
 import com.reduxrobotics.sensors.canandmag.Canandmag;
 
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
+
 /**
- * HELIUM {@link Canandmag} from ReduxRobotics absolute encoder, attached through the CAN bus.
+ * HELIUM {@link Canandmag} from ReduxRobotics absolute encoder, attached
+ * through the CAN bus.
  */
-public class CanAndMagSwerve extends SwerveAbsoluteEncoder
-{
+public class CanAndMagSwerve extends SwerveAbsoluteEncoder {
 
   /**
    * The {@link Canandmag} representing the CANandMag on the CAN bus.
@@ -18,8 +25,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    *
    * @param canid The CAN ID whenever the CANandMag is operating on the CANBus.
    */
-  public CanAndMagSwerve(int canid)
-  {
+  public CanAndMagSwerve(int canid) {
     encoder = new Canandmag(canid);
   }
 
@@ -29,8 +35,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * This will not clear the stored zero offset.
    */
   @Override
-  public void factoryDefault()
-  {
+  public void factoryDefault() {
     encoder.resetFactoryDefaults(false);
   }
 
@@ -38,8 +43,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * Clear sticky faults on the encoder.
    */
   @Override
-  public void clearStickyFaults()
-  {
+  public void clearStickyFaults() {
     encoder.clearStickyFaults();
   }
 
@@ -49,8 +53,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * @param inverted Whether the encoder is inverted.
    */
   @Override
-  public void configure(boolean inverted)
-  {
+  public void configure(boolean inverted) {
     encoder.setSettings(new Canandmag.Settings().setInvertDirection(inverted));
   }
 
@@ -60,8 +63,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition()
-  {
+  public double getAbsolutePosition() {
     return encoder.getAbsPosition() * 360;
   }
 
@@ -71,8 +73,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * @return Absolute encoder object.
    */
   @Override
-  public Object getAbsoluteEncoder()
-  {
+  public Object getAbsoluteEncoder() {
     return encoder;
   }
 
@@ -83,9 +84,8 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * @return true if setting the zero point succeeded, false otherwise
    */
   @Override
-  public boolean setAbsoluteEncoderOffset(double offset)
-  {
-    return encoder.setSettings(new Canandmag.Settings().setZeroOffset(offset));
+  public boolean setAbsoluteEncoderOffset(Measure<Angle> offset) {
+    return encoder.setSettings(new Canandmag.Settings().setZeroOffset(offset.in(Degrees)));
   }
 
   /**
@@ -94,8 +94,7 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder
    * @return velocity in degrees/sec.
    */
   @Override
-  public double getVelocity()
-  {
-    return encoder.getVelocity() * 360;
+  public Measure<Velocity<Angle>> getVelocity() {
+    return DegreesPerSecond.of(encoder.getVelocity() * 360);
   }
 }

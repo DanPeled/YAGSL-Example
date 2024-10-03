@@ -1,5 +1,10 @@
 package swervelib.encoders;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 import swervelib.telemetry.Alert;
@@ -7,34 +12,34 @@ import swervelib.telemetry.Alert;
 /**
  * Swerve Absolute Encoder for Thrifty Encoders and other analog encoders.
  */
-public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
-{
+public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder {
   // Entire class inspired by 5010
-  // Source: https://github.com/FRC5010/FRCLibrary/blob/main/FRC5010Example2023/src/main/java/frc/robot/FRC5010/sensors/AnalogInput5010.java
+  // Source:
+  // https://github.com/FRC5010/FRCLibrary/blob/main/FRC5010Example2023/src/main/java/frc/robot/FRC5010/sensors/AnalogInput5010.java
   /**
    * Encoder as Analog Input.
    */
-  public  AnalogInput encoder;
+  public AnalogInput encoder;
   /**
    * Inversion state of the encoder.
    */
-  private boolean     inverted = false;
+  private boolean inverted = false;
   /**
    * An {@link Alert} for if the absolute encoder offset cannot be set.
    */
-  private Alert       cannotSetOffset;
+  private Alert cannotSetOffset;
   /**
-   * An {@link Alert} detailing how the analog absolute encoder may not report accurate velocities.
+   * An {@link Alert} detailing how the analog absolute encoder may not report
+   * accurate velocities.
    */
-  private Alert       inaccurateVelocities;
+  private Alert inaccurateVelocities;
 
   /**
    * Construct the Thrifty Encoder as a Swerve Absolute Encoder.
    *
    * @param encoder Encoder to construct.
    */
-  public AnalogAbsoluteEncoderSwerve(AnalogInput encoder)
-  {
+  public AnalogAbsoluteEncoderSwerve(AnalogInput encoder) {
     this.encoder = encoder;
     cannotSetOffset = new Alert(
         "Encoders",
@@ -51,8 +56,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    *
    * @param channel Analog Input channel of which the encoder resides.
    */
-  public AnalogAbsoluteEncoderSwerve(int channel)
-  {
+  public AnalogAbsoluteEncoderSwerve(int channel) {
     this(new AnalogInput(channel));
   }
 
@@ -60,8 +64,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * Reset the encoder to factory defaults.
    */
   @Override
-  public void factoryDefault()
-  {
+  public void factoryDefault() {
     // Do nothing
   }
 
@@ -69,8 +72,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * Clear sticky faults on the encoder.
    */
   @Override
-  public void clearStickyFaults()
-  {
+  public void clearStickyFaults() {
     // Do nothing
   }
 
@@ -80,8 +82,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * @param inverted Whether the encoder is inverted.
    */
   @Override
-  public void configure(boolean inverted)
-  {
+  public void configure(boolean inverted) {
     this.inverted = inverted;
   }
 
@@ -91,8 +92,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition()
-  {
+  public double getAbsolutePosition() {
     return (inverted ? -1.0 : 1.0) * (encoder.getAverageVoltage() / RobotController.getVoltage5V()) * 360;
   }
 
@@ -102,8 +102,7 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * @return Absolute encoder object.
    */
   @Override
-  public Object getAbsoluteEncoder()
-  {
+  public Object getAbsoluteEncoder() {
     return encoder;
   }
 
@@ -111,12 +110,12 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * Cannot Set the offset of an Analog Absolute Encoder.
    *
    * @param offset the offset the Absolute Encoder uses as the zero point.
-   * @return Will always be false as setting the offset is unsupported of an Analog absolute encoder.
+   * @return Will always be false as setting the offset is unsupported of an
+   *         Analog absolute encoder.
    */
   @Override
-  public boolean setAbsoluteEncoderOffset(double offset)
-  {
-    //Do Nothing
+  public boolean setAbsoluteEncoderOffset(Measure<Angle> offset) {
+    // Do Nothing
     cannotSetOffset.set(true);
     return false;
   }
@@ -127,9 +126,8 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder
    * @return velocity in degrees/sec.
    */
   @Override
-  public double getVelocity()
-  {
+  public Measure<Velocity<Angle>> getVelocity() {
     inaccurateVelocities.set(true);
-    return encoder.getValue() * 360;
+    return DegreesPerSecond.of(encoder.getValue() * 360);
   }
 }
