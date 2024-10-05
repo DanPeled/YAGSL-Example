@@ -107,8 +107,8 @@ public class SparkMaxEncoderSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
-    return encoder.getPosition();
+  public Measure<Angle> getAbsolutePosition() {
+    return Degrees.of(encoder.getPosition());
   }
 
   /**

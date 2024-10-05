@@ -11,11 +11,13 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Mass;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Velocity;
 import swervelib.math.Matter;
 
 import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Seconds;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -34,7 +36,7 @@ public final class Constants {
   public static final Measure<Mass> ROBOT_MASS = Kilograms.of((148 - 20.3) * 0.453592); // 32lbs * kg per pound
   public static final Matter CHASSIS = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)),
       ROBOT_MASS.in(Kilograms));
-  public static final double LOOP_TIME = 0.13; // s, 20ms + 110ms sprk max velocity lag
+  public static final Measure<Time> LOOP_TIME = Seconds.of(0.13); // s, 20ms + 110ms sprk max velocity lag
   public static final Measure<Velocity<Distance>> MAX_SPEED = FeetPerSecond.of(14.5);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 
@@ -47,7 +49,7 @@ public final class Constants {
   public static final class DrivebaseConstants {
 
     // Hold time on motor brakes when disabled
-    public static final double WHEEL_LOCK_TIME = 10; // seconds
+    public static final Measure<Time> WHEEL_LOCK_TIME = Seconds.of(10); // seconds
   }
 
   public static class OperatorConstants {

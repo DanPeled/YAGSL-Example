@@ -29,13 +29,13 @@ public class ControllerPropertiesJson {
    *
    * @param driveConfiguration {@link SwerveDriveConfiguration} parsed
    *                           configuration.
-   * @param maxSpeedMPS        Maximum speed in meters per second for the angular
+   * @param maxSpeed        Maximum speed in meters per second for the angular
    *                           acceleration of the robot.
    * @return {@link SwerveControllerConfiguration} object based on parsed data.
    */
   public SwerveControllerConfiguration createControllerConfiguration(
-      SwerveDriveConfiguration driveConfiguration, Measure<Velocity<Distance>> maxSpeedMPS) {
+      SwerveDriveConfiguration driveConfiguration, Measure<Velocity<Distance>> maxSpeed) {
     return new SwerveControllerConfiguration(
-        driveConfiguration, heading, angleJoystickRadiusDeadband, maxSpeedMPS);
+        driveConfiguration, heading, angleJoystickRadiusDeadband, maxSpeed);
   }
 }

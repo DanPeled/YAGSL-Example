@@ -20,6 +20,7 @@ import com.revrobotics.SparkAnalogSensor;
 import com.revrobotics.SparkPIDController;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -439,7 +440,7 @@ public class SparkFlexSwerve extends SwerveMotor {
    */
   @Override
   public double getPosition() {
-    return absoluteEncoder == null ? encoder.getPosition() : absoluteEncoder.getAbsolutePosition();
+    return absoluteEncoder == null ? encoder.getPosition() : absoluteEncoder.getAbsolutePosition().in(Degrees);
   }
 
   /**

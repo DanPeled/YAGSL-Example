@@ -63,8 +63,8 @@ public class CanAndMagSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
-    return encoder.getAbsPosition() * 360;
+  public Measure<Angle> getAbsolutePosition() {
+    return Degrees.of(encoder.getAbsPosition() * 360);
   }
 
   /**

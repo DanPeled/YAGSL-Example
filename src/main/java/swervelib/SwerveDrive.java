@@ -21,6 +21,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.Notifier;
@@ -29,8 +30,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Milliseconds;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,7 +155,7 @@ public class SwerveDrive {
   /**
    * Maximum speed of the robot in meters per second.
    */
-  private Measure<Velocity<Distance>> maxSpeedMPS;
+  private Measure<Velocity<Distance>> maxSpeed;
 
   /**
    * Creates a new swerve drivebase subsystem. Robot is controlled via the
@@ -170,14 +173,12 @@ public class SwerveDrive {
    * @param controllerConfig The {@link SwerveControllerConfiguration} to use when
    *                         creating the
    *                         {@link SwerveController}.
-   * @param maxSpeedMPS      Maximum speed in meters per second, remember to use
-   *                         {@link Units#feetToMeters(double)} if
-   *                         you have feet per second!
+   * @param maxSpeed         Maximum speed in meters per second
    */
   public SwerveDrive(
       SwerveDriveConfiguration config, SwerveControllerConfiguration controllerConfig,
-      Measure<Velocity<Distance>> maxSpeedMPS) {
-    this.maxSpeedMPS = maxSpeedMPS;
+      Measure<Velocity<Distance>> maxSpeed) {
+    this.maxSpeed = maxSpeed;
     swerveDriveConfiguration = config;
     swerveController = new SwerveController(controllerConfig);
     // Create Kinematics from swerve module locations.
@@ -189,11 +190,11 @@ public class SwerveDrive {
     // If the robot is real, instantiate the IMU instead.
     if (SwerveDriveTelemetry.isSimulation) {
       simIMU = new SwerveIMUSimulation();
-      imuReadingCache = new Cache<>(simIMU::getGyroRotation3d, 5L);
+      imuReadingCache = new Cache<>(simIMU::getGyroRotation3d, Milliseconds.of(5L));
     } else {
       imu = config.imu;
       imu.factoryDefault();
-      imuReadingCache = new Cache<>(imu::getRotation3d, 5L);
+      imuReadingCache = new Cache<>(imu::getRotation3d, Milliseconds.of(5L));
     }
 
     this.swerveModules = config.modules;
@@ -208,7 +209,7 @@ public class SwerveDrive {
             Rotation2d.fromDegrees(0))); // x,y,heading in radians; Vision measurement std dev, higher=less weight
 
     zeroGyro();
-    setMaximumSpeed(maxSpeedMPS);
+    setMaximumSpeed(maxSpeed);
 
     // Initialize Telemetry
     if (SwerveDriveTelemetry.verbosity.ordinal() >= TelemetryVerbosity.POSE.ordinal()) {
@@ -216,7 +217,7 @@ public class SwerveDrive {
     }
 
     if (SwerveDriveTelemetry.verbosity.ordinal() >= TelemetryVerbosity.INFO.ordinal()) {
-      SwerveDriveTelemetry.maxSpeed = maxSpeedMPS;
+      SwerveDriveTelemetry.maxSpeed = maxSpeed;
       SwerveDriveTelemetry.maxAngularVelocity = swerveController.config.maxAngularVelocity;
       SwerveDriveTelemetry.moduleCount = swerveModules.length;
       SwerveDriveTelemetry.sizeFrontBack = Units.metersToInches(SwerveMath.getSwerveModule(swerveModules, true,
@@ -252,7 +253,7 @@ public class SwerveDrive {
    * @param driveMotor      Drive motor reading cache in milliseconds.
    * @param absoluteEncoder Absolute encoder reading cache in milliseconds.
    */
-  public void updateCacheValidityPeriods(long imu, long driveMotor, long absoluteEncoder) {
+  public void updateCacheValidityPeriods(Measure<Time> imu, Measure<Time> driveMotor, Measure<Time> absoluteEncoder) {
     imuReadingCache.updateValidityPeriod(imu);
     for (SwerveModule module : swerveModules) {
       module.drivePositionCache.updateValidityPeriod(driveMotor);
@@ -286,9 +287,9 @@ public class SwerveDrive {
    *
    * @param period period in seconds.
    */
-  public void setOdometryPeriod(double period) {
+  public void setOdometryPeriod(Measure<Time> period) {
     odometryThread.stop();
-    odometryThread.startPeriodic(period);
+    odometryThread.startPeriodic(period.in(Seconds));
   }
 
   /**
@@ -583,13 +584,13 @@ public class SwerveDrive {
   /**
    * Get the maximum velocity from
    * {@link SwerveDrive#attainableMaxTranslationalSpeed} or
-   * {@link SwerveDrive#maxSpeedMPS} whichever is higher.
+   * {@link SwerveDrive#maxSpeed} whichever is higher.
    *
    * @return Maximum speed in meters/second.
    */
   public Measure<Velocity<Distance>> getMaximumVelocity() {
     return MetersPerSecond.of(Math.max(this.attainableMaxTranslationalSpeed.in(MetersPerSecond),
-        maxSpeedMPS.in(MetersPerSecond)));
+        maxSpeed.in(MetersPerSecond)));
   }
 
   /**
@@ -617,11 +618,11 @@ public class SwerveDrive {
     if (attainableMaxTranslationalSpeed.in(MetersPerSecond) != 0
         || attainableMaxRotationalVelocity.in(RadiansPerSecond) != 0) {
       SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, getRobotVelocity(),
-          maxSpeedMPS,
+          maxSpeed,
           attainableMaxTranslationalSpeed,
           attainableMaxRotationalVelocity);
     } else {
-      SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, maxSpeedMPS);
+      SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, maxSpeed);
     }
 
     // Sets states
@@ -784,7 +785,7 @@ public class SwerveDrive {
     // is being
     // simulated
     if (SwerveDriveTelemetry.isSimulation) {
-      simIMU.setAngle(0);
+      simIMU.setAngle(Radians.of(0));
     } else {
       setGyroOffset(imu.getRawRotation3d());
     }
@@ -867,7 +868,7 @@ public class SwerveDrive {
 
   /**
    * Set the maximum speed of the drive motors, modified
-   * {@link SwerveDrive#maxSpeedMPS} which is used for the
+   * {@link SwerveDrive#maxSpeed} which is used for the
    * {@link SwerveDrive#setRawModuleStates(SwerveModuleState[], boolean)} function
    * and
    * {@link SwerveController#getTargetSpeeds(double, double, double, double, double)}
@@ -886,7 +887,7 @@ public class SwerveDrive {
    */
   public void setMaximumSpeed(Measure<Velocity<Distance>> maximumSpeed, boolean updateModuleFeedforward,
       Measure<Voltage> optimalVoltage) {
-    maxSpeedMPS = maximumSpeed;
+    maxSpeed = maximumSpeed;
     swerveDriveConfiguration.physicalCharacteristics.optimalVoltage = optimalVoltage;
     for (SwerveModule module : swerveModules) {
       module.maxSpeed = maximumSpeed;
@@ -900,7 +901,7 @@ public class SwerveDrive {
 
   /**
    * Set the maximum speed of the drive motors, modified
-   * {@link SwerveDrive#maxSpeedMPS} which is used for the
+   * {@link SwerveDrive#maxSpeed} which is used for the
    * {@link SwerveDrive#setRawModuleStates(SwerveModuleState[], boolean)} function
    * and
    * {@link SwerveController#getTargetSpeeds(double, double, double, double, double)}
@@ -1052,7 +1053,7 @@ public class SwerveDrive {
    */
   public void setGyroOffset(Rotation3d offset) {
     if (SwerveDriveTelemetry.isSimulation) {
-      simIMU.setAngle(offset.getZ());
+      simIMU.setAngle(Radians.of(offset.getZ()));
     } else {
       imu.setOffset(offset);
     }

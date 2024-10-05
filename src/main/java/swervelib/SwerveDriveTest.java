@@ -192,14 +192,14 @@ public class SwerveDriveTest {
       System.out.println("Fetching the current absolute encoder and drive encoder position.");
       module.getAngleMotor().setVoltage(Volt.of(0));
       Timer.delay(1);
-      Rotation2d startingAbsoluteEncoderPosition = Rotation2d.fromDegrees(absoluteEncoder.getAbsolutePosition());
+      Rotation2d startingAbsoluteEncoderPosition = Rotation2d.fromDegrees(absoluteEncoder.getAbsolutePosition().in(Degrees));
       double driveEncoderPositionRotations = module.getDriveMotor().getPosition() /
           module.configuration.conversionFactors.drive;
       if (automatic) {
         module.getAngleMotor().setVoltage(volts);
         Timer.delay(0.01);
         System.out.println("Rotating the module 360 degrees");
-        while (!Rotation2d.fromDegrees(absoluteEncoder.getAbsolutePosition()).equals(startingAbsoluteEncoderPosition))
+        while (!Rotation2d.fromDegrees(absoluteEncoder.getAbsolutePosition().in(Degrees)).equals(startingAbsoluteEncoderPosition))
           ;
         module.getAngleMotor().setVoltage(Volts.of(0));
       } else {
@@ -336,7 +336,7 @@ public class SwerveDriveTest {
   public static void logAngularMotorActivity(SwerveModule module, SysIdRoutineLog log,
       Supplier<Measure<Voltage>> powerSupplied) {
     double power = powerSupplied.get().in(Volts);
-    double angle = module.getAbsolutePosition();
+    double angle = module.getAbsolutePosition().in(Degrees);
     double velocity = module.getAbsoluteEncoder().getVelocity().in(DegreesPerSecond);
     SmartDashboard.putNumber("swerve/modules/" + module.configuration.name + "/SysId Angle Power", power);
     SmartDashboard.putNumber("swerve/modules/" + module.configuration.name + "/SysId Angle Position", angle);

@@ -12,6 +12,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Mass;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Time;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 
@@ -27,6 +28,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 /**
@@ -307,7 +309,7 @@ public class SwerveMath {
       Translation2d commandedVelocity,
       ChassisSpeeds fieldVelocity,
       Pose2d robotPose,
-      double loopTime,
+      Measure<Time> loopTime,
       Measure<Mass> robotMass,
       List<Matter> matter,
       SwerveDriveConfiguration config) {
@@ -333,7 +335,7 @@ public class SwerveMath {
 
     // Calculate the maximum achievable velocity by the next loop cycle.
     // delta V = Vf - Vi = at
-    Translation2d maxAchievableDeltaVelocity = maxAccel.times(loopTime);
+    Translation2d maxAchievableDeltaVelocity = maxAccel.times(loopTime.in(Seconds));
 
     if (deltaV.getNorm() > maxAchievableDeltaVelocity.getNorm()) {
       return maxAchievableDeltaVelocity.plus(currentVelocity);

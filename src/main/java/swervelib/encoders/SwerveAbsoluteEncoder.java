@@ -42,7 +42,7 @@ public abstract class SwerveAbsoluteEncoder {
    *
    * @return Absolute position in degrees from [0, 360).
    */
-  public abstract double getAbsolutePosition();
+  public abstract Measure<Angle> getAbsolutePosition();
 
   /**
    * Get the instantiated absolute encoder Object.

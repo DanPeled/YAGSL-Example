@@ -1,5 +1,6 @@
 package swervelib.encoders;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import edu.wpi.first.units.Angle;
@@ -92,8 +93,8 @@ public class AnalogAbsoluteEncoderSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
-    return (inverted ? -1.0 : 1.0) * (encoder.getAverageVoltage() / RobotController.getVoltage5V()) * 360;
+  public Measure<Angle> getAbsolutePosition() {
+    return Degrees.of((inverted ? -1.0 : 1.0) * (encoder.getAverageVoltage() / RobotController.getVoltage5V()) * 360);
   }
 
   /**

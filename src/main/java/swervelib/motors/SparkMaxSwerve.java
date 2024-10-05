@@ -19,6 +19,7 @@ import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
@@ -206,7 +207,7 @@ public class SparkMaxSwerve extends SwerveMotor {
       absoluteEncoder = encoder;
       configureSparkMax(() -> pid.setFeedbackDevice((MotorFeedbackSensor) absoluteEncoder.getAbsoluteEncoder()));
       velocity = () -> absoluteEncoder.getVelocity().in(DegreesPerSecond);
-      position = absoluteEncoder::getAbsolutePosition;
+      position = () -> absoluteEncoder.getAbsolutePosition().in(Degrees);
     }
     return this;
   }

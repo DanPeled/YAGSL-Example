@@ -126,7 +126,7 @@ public class CANCoderSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
+  public Measure<Angle> getAbsolutePosition() {
     readingError = false;
     MagnetHealthValue strength = encoder.getMagnetHealth().getValue();
 
@@ -134,7 +134,7 @@ public class CANCoderSwerve extends SwerveAbsoluteEncoder {
     if (strength == MagnetHealthValue.Magnet_Invalid || strength == MagnetHealthValue.Magnet_Red) {
       readingError = true;
       readingFaulty.set(true);
-      return 0;
+      return Degrees.of(0);
     } else {
       readingFaulty.set(false);
     }
@@ -157,7 +157,7 @@ public class CANCoderSwerve extends SwerveAbsoluteEncoder {
       readingIgnored.set(false);
     }
 
-    return angle.getValue() * 360;
+    return Degrees.of(angle.getValue() * 360);
   }
 
   /**

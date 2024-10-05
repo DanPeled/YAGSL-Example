@@ -25,6 +25,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Milliseconds;
 
 /**
  * The Swerve Module class which represents and controls Swerve Modules for the
@@ -39,7 +40,7 @@ public class SwerveModule {
   /**
    * Absolute encoder position cache.
    */
-  public final Cache<Double> absolutePositionCache;
+  public final Cache<Measure<Angle>> absolutePositionCache;
   /**
    * Drive motor position cache.
    */
@@ -167,7 +168,7 @@ public class SwerveModule {
     }
 
     // Setup the cache for the absolute encoder position.
-    absolutePositionCache = new Cache<>(this::getRawAbsolutePosition, 15);
+    absolutePositionCache = new Cache<>(this::getRawAbsolutePosition, Milliseconds.of(15));
 
     // Config angle motor/controller
     angleMotor.configureIntegratedEncoder(moduleConfiguration.conversionFactors.angle);
@@ -178,7 +179,7 @@ public class SwerveModule {
 
     // Set the position AFTER settings the conversion factor.
     if (absoluteEncoder != null) {
-      angleMotor.setPosition(getAbsolutePosition());
+      angleMotor.setPosition(getAbsolutePosition().in(Degrees));
     }
 
     // Config drive motor/controller
@@ -190,8 +191,8 @@ public class SwerveModule {
     driveMotor.burnFlash();
     angleMotor.burnFlash();
 
-    drivePositionCache = new Cache<>(driveMotor::getPosition, 15);
-    driveVelocityCache = new Cache<>(driveMotor::getVelocity, 15);
+    drivePositionCache = new Cache<>(driveMotor::getPosition, Milliseconds.of(15));
+    driveVelocityCache = new Cache<>(driveMotor::getVelocity, Milliseconds.of(15));
 
     if (SwerveDriveTelemetry.isSimulation) {
       simModule = new SwerveModuleSimulation();
@@ -326,7 +327,7 @@ public class SwerveModule {
    *                     onto the swerve module.
    */
   public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop, boolean force) {
-    desiredState = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(getAbsolutePosition()));
+    desiredState = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(getAbsolutePosition().in(Degrees)));
 
     // If we are forcing the angle
     if (!force && antiJitterEnabled) {
@@ -351,7 +352,7 @@ public class SwerveModule {
     // Synchronize encoders if queued and send in the current position as the value
     // from the absolute encoder.
     if (absoluteEncoder != null && synchronizeEncoderQueued) {
-      double absoluteEncoderPosition = getAbsolutePosition();
+      double absoluteEncoderPosition = getAbsolutePosition().in(Degrees);
       angleMotor.setPosition(absoluteEncoderPosition);
       angleMotor.setReference(desiredState.angle.getDegrees(), 0, absoluteEncoderPosition);
       synchronizeEncoderQueued = false;
@@ -399,7 +400,7 @@ public class SwerveModule {
      * doesn't help us at all
      */
     cosineScalar = Rotation2d.fromDegrees(desiredState.angle.getDegrees())
-        .minus(Rotation2d.fromDegrees(getAbsolutePosition()))
+        .minus(Rotation2d.fromDegrees(getAbsolutePosition().in(Degrees)))
         .getCos(); // TODO: Investigate angle modulus by 180.
     /*
      * Make sure we don't invert our drive, even though we shouldn't ever target
@@ -432,7 +433,7 @@ public class SwerveModule {
     Rotation2d azimuth;
     if (!SwerveDriveTelemetry.isSimulation) {
       velocity = driveVelocityCache.getValue();
-      azimuth = Rotation2d.fromDegrees(getAbsolutePosition());
+      azimuth = Rotation2d.fromDegrees(getAbsolutePosition().in(Degrees));
     } else {
       return simModule.getState();
     }
@@ -449,7 +450,7 @@ public class SwerveModule {
     Rotation2d azimuth;
     if (!SwerveDriveTelemetry.isSimulation) {
       position = drivePositionCache.getValue();
-      azimuth = Rotation2d.fromDegrees(getAbsolutePosition());
+      azimuth = Rotation2d.fromDegrees(getAbsolutePosition().in(Degrees));
     } else {
       return simModule.getPosition();
     }
@@ -462,7 +463,7 @@ public class SwerveModule {
    *
    * @return Absolute encoder angle in degrees in the range [0, 360).
    */
-  public double getAbsolutePosition() {
+  public Measure<Angle> getAbsolutePosition() {
     return absolutePositionCache.getValue();
   }
 
@@ -472,19 +473,19 @@ public class SwerveModule {
    *
    * @return Absolute encoder angle in degrees in the range [0, 360).
    */
-  public double getRawAbsolutePosition() {
-    double angle;
+  public Measure<Angle> getRawAbsolutePosition() {
+    Measure<Angle> angle;
     if (absoluteEncoder != null) {
-      angle = absoluteEncoder.getAbsolutePosition() - angleOffset.in(Degrees);
+      angle = absoluteEncoder.getAbsolutePosition().minus(angleOffset);
       if (absoluteEncoder.readingError) {
         angle = getRelativePosition();
       }
     } else {
       angle = getRelativePosition();
     }
-    angle %= 360;
-    if (angle < 0.0) {
-      angle += 360;
+    angle = Degrees.of(angle.in(Degrees) % 360);
+    if (angle.lt(Degrees.of(0.0))) {
+      angle = angle.plus(Degrees.of(360));
     }
 
     return angle;
@@ -495,8 +496,8 @@ public class SwerveModule {
    *
    * @return Angle in degrees.
    */
-  public double getRelativePosition() {
-    return angleMotor.getPosition();
+  public Measure<Angle> getRelativePosition() {
+    return Degrees.of(angleMotor.getPosition());
   }
 
   /**
@@ -622,12 +623,12 @@ public class SwerveModule {
    */
   public void updateTelemetry() {
     if (absoluteEncoder != null) {
-      SmartDashboard.putNumber(rawAbsoluteAngleName, absoluteEncoder.getAbsolutePosition());
+      SmartDashboard.putNumber(rawAbsoluteAngleName, absoluteEncoder.getAbsolutePosition().in(Degrees));
     }
     SmartDashboard.putNumber(rawAngleName, angleMotor.getPosition());
     SmartDashboard.putNumber(rawDriveName, driveMotor.getPosition());
     SmartDashboard.putNumber(rawDriveVelName, driveMotor.getVelocity());
-    SmartDashboard.putNumber(adjAbsoluteAngleName, getAbsolutePosition());
+    SmartDashboard.putNumber(adjAbsoluteAngleName, getAbsolutePosition().in(Degrees));
     SmartDashboard.putNumber(absoluteEncoderIssueName, getAbsoluteEncoderReadIssue() ? 1 : 0);
   }
 }

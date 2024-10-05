@@ -68,8 +68,8 @@ public class PWMDutyCycleEncoderSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
-    return (isInverted ? -1.0 : 1.0) * ((encoder.get() * 360) - offset.in(Degrees));
+  public Measure<Angle> getAbsolutePosition() {
+    return Degrees.of((isInverted ? -1.0 : 1.0) * ((encoder.get() * 360) - offset.in(Degrees)));
   }
 
   /**

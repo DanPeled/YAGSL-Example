@@ -9,6 +9,7 @@ import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Velocity;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 
 import java.util.function.Supplier;
@@ -107,8 +108,8 @@ public class SparkMaxAnalogEncoderSwerve extends SwerveAbsoluteEncoder {
    * @return Absolute position in degrees from [0, 360).
    */
   @Override
-  public double getAbsolutePosition() {
-    return encoder.getPosition();
+  public Measure<Angle> getAbsolutePosition() {
+    return Degrees.of(encoder.getPosition());
   }
 
   /**
