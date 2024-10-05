@@ -338,6 +338,11 @@ public class SwerveDriveTest {
     double power = powerSupplied.get().in(Volts);
     double angle = module.getAbsolutePosition().in(Degrees);
     double velocity = module.getAbsoluteEncoder().getVelocity().in(DegreesPerSecond);
+  public static void logAngularMotorActivity(SwerveModule module, SysIdRoutineLog log, Supplier<Double> powerSupplied)
+  {
+    double power    = powerSupplied.get();
+    double angle    = module.getAngleMotor().getPosition();
+    double velocity = module.getAngleMotor().getVelocity();
     SmartDashboard.putNumber("swerve/modules/" + module.configuration.name + "/SysId Angle Power", power);
     SmartDashboard.putNumber("swerve/modules/" + module.configuration.name + "/SysId Angle Position", angle);
     SmartDashboard.putNumber("swerve/modules/" + module.configuration.name + "/SysId Absolute Encoder Velocity",

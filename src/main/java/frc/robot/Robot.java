@@ -127,6 +127,8 @@ public class Robot extends TimedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    } else {
+      CommandScheduler.getInstance().cancelAll();
     }
     m_robotContainer.setDriveMode();
     m_robotContainer.setMotorBrake(true);
@@ -143,11 +145,7 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
-    try {
-      new SwerveParser(new File(Filesystem.getDeployDirectory(), "swerve"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    m_robotContainer.setDriveMode();
   }
 
   /**
