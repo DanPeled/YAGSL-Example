@@ -12,6 +12,7 @@ import edu.wpi.first.units.Time;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
@@ -42,6 +43,7 @@ public class SwerveIMUSimulation {
     timer = new Timer();
     timer.start();
     lastTime = Seconds.of(timer.get());
+    angle = Degrees.of(0);
   }
 
   /**
